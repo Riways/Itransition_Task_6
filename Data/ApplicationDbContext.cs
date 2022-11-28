@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 using Task_6_Blazor_Server.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Task_6_Blazor_Server.Data
 {

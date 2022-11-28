@@ -22,6 +22,25 @@ namespace Task_6_Blazor_Server.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Task_6_Blazor_Server.Models.DialogModel", b =>
+                {
+                    b.Property<int>("DialogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DialogId"));
+
+                    b.Property<int>("FirstUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SecondUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("DialogId");
+
+                    b.ToTable("Dialogs");
+                });
+
             modelBuilder.Entity("Task_6_Blazor_Server.Models.MessageModel", b =>
                 {
                     b.Property<int>("Id")
@@ -33,6 +52,9 @@ namespace Task_6_Blazor_Server.Migrations
                     b.Property<DateTime>("DateOfSending")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("DialogId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("MessageBody")
                         .IsRequired()
                         .HasColumnType("text");
@@ -41,13 +63,12 @@ namespace Task_6_Blazor_Server.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("RecipientId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("SenderId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DialogId");
 
                     b.ToTable("Messages");
                 });
@@ -69,6 +90,22 @@ namespace Task_6_Blazor_Server.Migrations
                     b.HasAlternateKey("Name");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Task_6_Blazor_Server.Models.MessageModel", b =>
+                {
+                    b.HasOne("Task_6_Blazor_Server.Models.DialogModel", "Dialog")
+                        .WithMany("Messages")
+                        .HasForeignKey("DialogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dialog");
+                });
+
+            modelBuilder.Entity("Task_6_Blazor_Server.Models.DialogModel", b =>
+                {
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }
