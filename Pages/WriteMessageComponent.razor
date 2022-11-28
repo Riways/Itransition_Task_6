@@ -1,0 +1,115 @@
+﻿@using Gma.DataStructures.StringSearch;
+
+
+
+<MudGrid Class="align-content-center mt-16 " Justify="Justify.Center" id="greetingForm"  >
+    <MudItem  xs="12"  md="6">
+        <MudPaper Class="pa-10 overflow-auto" Elevation="3" >
+            <MudForm >
+                <MudGrid Justify="Justify.FlexEnd">
+                    <MudItem xs="12">
+                     <MudAutocomplete T="string"    SearchFunc="@UserSearch" ValueChanged="@((e) => {RecipientChosen(e);})"  Variant="Variant.Outlined" ResetValueOnEmptyText="true"  AdornmentIcon="@Icons.Material.Filled.Search"   Label="Recipient name" Immediate="true" Required="true" RequiredError="User name is required!"/>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField T="string" ValueChanged="@((e) => {HandleTitleInput(e);})"  Variant="Variant.Outlined" InputType="InputType.Text" Immediate="true"  Required="true" Label="Title" RequiredError="Title is required!"/>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField T="string" ValueChanged="@((e) => {HandleMessageInput(e);})"  Variant="Variant.Outlined" Lines="5" Label="Message"  Required="true" RequiredError="Message should have a body!"/>
+                    </MudItem>
+                    <MudButton Class="my-1 mx-3" Variant="Variant.Filled" Disabled="@(!_isValidTitle || !_isValidRecipientName || !_isValidMessage)" OnClick="@SendMessage"  Color="Color.Primary">SEND</MudButton>
+                </MudGrid>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+    @if (_recipient != null)
+    {
+        <MudItem  xs="12" md="6">
+                <MudPaper Class="px-10 pb-5 overflow-auto" Elevation="3" Style="height:80vh;" >
+                <MudGrid>
+                    <MudItem xs="12" Class="d-flex justify-content-between pb-6 sticky-top"  Style="background-color:white;  ">
+                        <MudText   Align="Align.Start"   Typo="Typo.h6" >@_recipient.Name:</MudText>
+                        <MudText Align="Align.End" Typo="Typo.h6"  >You:</MudText>
+                    </MudItem>
+                    <MudItem xs="12" >
+                        <MudExpansionPanels >
+                            @foreach (var message in _currentDialog)
+                            {
+                                    <MessageComponent   Client="@Client" Message="@message"/> 
+                            }
+                        </MudExpansionPanels>
+                    </MudItem>
+                </MudGrid>
+                
+            </MudPaper>
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+
+    [Parameter]
+    public IUserService UserService { get; set; }
+    [Parameter]
+    public UserModel  Client{ get; set; }
+    [Inject] 
+    private IMessageService _messageService{ get; set; }
+    private UserModel _recipient { get; set; } 
+    private string _currentTitle { get; set; } 
+    private string _currentMessage { get; set; }
+    private List<MessageModel> _currentDialog { get; set; }
+
+    private bool _isValidRecipientName { get; set; } = false;
+    private bool _isValidTitle { get; set; } = false;
+    private bool _isValidMessage { get; set; } = false;
+
+    private UkkonenTrie<string> _usernames;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _usernames = UserService.GetAllUsernames();
+    }
+
+    private async Task<IEnumerable<string>> UserSearch(string input)
+    {
+        await Task.Delay(5);
+        if (String.IsNullOrEmpty(input))
+            return new string[0];
+        var result = _usernames.Retrieve(input);
+        return result;
+    }
+
+    private void HandleMessageInput(string messageBody)
+    {
+        _currentMessage = messageBody;
+        _isValidMessage = messageBody.Length > 0 ? true : false;
+    }
+
+    private void HandleTitleInput(string title)
+    {
+        _currentTitle = title;
+        _isValidTitle = title.Length > 0 ? true : false;
+    }
+
+    private void RecipientChosen(string recipientName)
+    {
+        if(recipientName == null)
+        {
+            _isValidRecipientName = false;
+            _recipient = null;
+            return;
+        }
+        _isValidRecipientName = true;
+        _recipient = UserService.GetUserByUsername(recipientName);
+        _currentDialog = _messageService.GetDialog(Client.Id, _recipient.Id);
+    }
+
+    private void SendMessage()
+    {
+        DateTime dateBeforeSending = DateTime.UtcNow;
+        _messageService.SendMessage(Client.Id, _recipient.Id, _currentTitle, _currentMessage);
+        List<MessageModel> newMessages = _messageService.GetDialogAfterSpecifiedDate(Client.Id, _recipient.Id, dateBeforeSending);
+        Console.WriteLine(newMessages.Count);
+        newMessages.AddRange(_currentDialog);
+        _currentDialog = newMessages;
+    }
+}

@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\Task_6_Blazor_Server.props" />
+</Project>

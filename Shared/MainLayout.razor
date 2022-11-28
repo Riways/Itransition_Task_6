@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+
+<PageTitle>Task_6_Blazor_Server</PageTitle>
+
+<div class="page">
+    
+    <main  >
+
+        <article   >
+            @Body
+            <MudThemeProvider/>
+            <MudDialogProvider/>
+            <MudSnackbarProvider/>
+        </article>
+    </main>
+</div>
+
+@code{
+    public UserModel Client;
+
+    public void SetClient(UserModel client)
+    {
+        Client = client;
+    }
+}
+

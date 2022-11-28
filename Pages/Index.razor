@@ -1,0 +1,34 @@
+﻿@page "/"
+
+@inject IUserService UserService
+
+<PageTitle>Index</PageTitle>
+<MudAppBar Color="Color.Surface"  Fixed="true" Elevation="5" >
+    <MudText  Typo="Typo.h5">Task_6</MudText>
+    <MudSpacer/>
+    @if (@Client != null)
+    {
+        <MudText Class="mx-2"  Typo="Typo.h5">Hello, @Client.Name</MudText>
+    }
+    <MudIconButton  Icon="@Icons.Custom.Brands.GitHub" Size="Size.Large" Color="Color.Inherit" />
+</MudAppBar>
+@if (Client == null)
+{
+    <GreetingComponent  ClientSetter="@SetClient"/>
+}
+else
+{
+    <WriteMessageComponent Client="Client" UserService="UserService"/>
+}
+@code{
+    public UserModel Client { get; set; }
+    private UserModel _currentInterlocutor { get; set; }
+    private UserModel _currentDialog { get;set;}
+    private ApplicationDbContext _dbContext;
+
+    public void SetClient(UserModel client)
+    {
+        Client = client;
+    }
+
+}

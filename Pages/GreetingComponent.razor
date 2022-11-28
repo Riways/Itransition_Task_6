@@ -1,0 +1,53 @@
+﻿@inject IUserService _userService
+<MudGrid Class="align-content-center mt-16" Justify="Justify.Center" id="greetingForm">
+    <MudItem   xs="12" md="6" lg="4">
+            <MudPaper Class="" Elevation="3">
+            @if(@_isLoginInProcess)
+            {
+                <MudGrid Class="pa-5" Justify="Justify.FlexEnd">
+                     <MudItem xs="12">
+                        <MudSkeleton Class="ml-auto" SkeletonType="SkeletonType.Text" Animation="Animation.Wave" Height="30px"/>
+                     </MudItem>
+                     <MudItem Class="mx-2" xs="1">
+                        <MudSkeleton SkeletonType="SkeletonType.Circle" Animation="Animation.Wave" Width="30px" Height="30px"/>
+                     </MudItem>
+                </MudGrid>              
+            }          
+            else
+            {
+                <MudForm Class="p-5 d-flex align-content-space-between"   @bind-IsValid="@_isValidInput">
+                    <MudGrid Justify="Justify.FlexEnd">
+                        <MudText Class="mr-auto mx-2">Type your username:</MudText>
+                        <MudItem xs="12">
+                                <MudTextField  @bind-Value="_currentUsernameInput" T="string"  TextChanged="@ValidateInput"   Label="Username" Immediate="true" Required="true" RequiredError="User name is required!"/>
+                        </MudItem>
+                        <MudButton Class="mx-3" Variant="Variant.Filled" Color="Color.Primary"  Disabled="@(!_isValidInput)"  @onclick="LogInHandler">Log in</MudButton>
+                    </MudGrid>
+                </MudForm>
+            }
+            </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Parameter]
+    public EventCallback<UserModel> ClientSetter { get; set; }
+    private string _currentUsernameInput { get; set; } = "";
+    private bool _isValidInput { get; set; } = false;
+    private bool _isLoginInProcess { get; set; } = false;
+
+
+    private void ValidateInput()
+    {
+        _isValidInput = _currentUsernameInput.Length > 0;
+    }
+
+    private void LogInHandler()
+    {
+        _isLoginInProcess = true;
+        UserModel user = _userService.GetUserByUsername(_currentUsernameInput);
+        if (user == null)
+            user = _userService.CreateUser(_currentUsernameInput);
+        ClientSetter.InvokeAsync(user);
+    }
+}
