@@ -15,7 +15,7 @@ else
         }
         else
         {
-            <SendMessageComponent HubConnection="_hubConnection" ContactSetter="@SetContact" SetMessagesFromCurrentDialog="@SetMessagesFromCurrentDialog" SwitchViewBetweenContactsAndSendMessage="@SwitchViewBetweenContactsAndSendMessage" Client="Client" MessagesFromCurrentDialog="MessagesFromCurrentDialog" Recipient="Contact" />
+            <SendMessageComponent Usernames="Usernames" HubConnection="_hubConnection" ContactSetter="@SetContact" SetMessagesFromCurrentDialog="@SetMessagesFromCurrentDialog" SwitchViewBetweenContactsAndSendMessage="@SwitchViewBetweenContactsAndSendMessage" Client="Client" MessagesFromCurrentDialog="MessagesFromCurrentDialog" Recipient="Contact" />
         }
         @if (Contact != null)
         {
@@ -42,6 +42,7 @@ else
     public UserModel? Client { get; set; }
     public UserModel? Contact { get; set; }
     public List<MessageModel> MessagesFromCurrentDialog { get; set; }
+    public UkkonenTrie<string>? Usernames { get; set; }
     public bool isContactsView { get; set; } = false;
     private HubConnection? _hubConnection;
 
@@ -49,10 +50,20 @@ else
     public MessageModel PopMessage { get; set; }
     public bool _popUpIsOpen { get; set; } = false;
 
+    protected override async Task? OnInitializedAsync()
+    {
+        Usernames = UserService.GetAllUsernames();
+    }
+
     public async void SetClient(UserModel client)
     {
         Connect();
         Client = client;
+        if (!Usernames.Retrieve(Client.Name).Contains(Client.Name))
+        {
+            await _hubConnection.SendAsync("NewUser", client);
+            Usernames.Add(Client.Name, Client.Name);
+        }
     }
 
     public void SetContact(UserModel contact)
@@ -79,16 +90,21 @@ else
         {
             if (recipient.Id == Client.Id )
             {
-                if(message.SenderId == Contact.Id)
+                if(Contact != null && message.SenderId == Contact.Id)
                     MessagesFromCurrentDialog.Insert(0, message);
                 else
                 {
                     _popUpIsOpen = true;
                     PopMessage = message;
-                    PopSender = UserService.GetUserById(recipient.Id);
+                    PopSender = UserService.GetUserById(message.SenderId);
                 }
                 StateHasChanged();
             }
+        });
+        _hubConnection.On<UserModel>("AddUser", (user) =>
+        {
+            Usernames.Add(user.Name, user.Name);
+            StateHasChanged();
         });
         await _hubConnection.StartAsync();
     }

@@ -1,5 +1,4 @@
-﻿@using Gma.DataStructures.StringSearch;
-
+﻿
 <MudItem  xs="12"  md="6">
     <MudPaper Class="pa-10 overflow-auto" Elevation="3" >
         <MudForm >
@@ -33,6 +32,8 @@
     [Parameter]
     public UserModel? Recipient { get; set; }
     [Parameter]
+    public UkkonenTrie<string>? Usernames { get; set; }
+    [Parameter]
     public List<MessageModel>? MessagesFromCurrentDialog { get; set; }
     [Parameter]
     public EventCallback<List<MessageModel>> SetMessagesFromCurrentDialog { get; set; }
@@ -50,13 +51,6 @@
     private bool _isValidTitle { get; set; } = false;
     private bool _isValidMessage { get; set; } = false;
 
-    private UkkonenTrie<string>? _usernames;
-
-    protected override async Task? OnInitializedAsync()
-    {
-        _usernames = UserService.GetAllUsernames();
-    }
-
     private void ChangeView()
     {
         SwitchViewBetweenContactsAndSendMessage.InvokeAsync();
@@ -67,7 +61,7 @@
         await Task.Delay(5);
         if (String.IsNullOrEmpty(input))
             return new string[0];
-        var result = _usernames.Retrieve(input);
+        var result = Usernames.Retrieve(input);
         return result;
     }
 
