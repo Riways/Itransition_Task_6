@@ -24,8 +24,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ29udGFjdHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/Programming_scratch/.NET_PART/Projects/Itransition_course/C\#/Task_6_Blazor_Server/Pages/DialogView.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGlhbG9nVmlldy5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/Programming_scratch/.NET_PART/Projects/Itransition_course/C\#/Task_6_Blazor_Server/Pages/GreetingComponent.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JlZXRpbmdDb21wb25lbnQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/Programming_scratch/.NET_PART/Projects/Itransition_course/C\#/Task_6_Blazor_Server/Pages/Header.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSGVhZGVyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Programming_scratch/.NET_PART/Projects/Itransition_course/C\#/Task_6_Blazor_Server/Pages/Index.razor]
@@ -36,8 +44,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTWVzc2FnZUNvbXBvbmVudC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[D:/Programming_scratch/.NET_PART/Projects/Itransition_course/C\#/Task_6_Blazor_Server/Pages/WriteMessageComponent.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcV3JpdGVNZXNzYWdlQ29tcG9uZW50LnJhem9y
+[D:/Programming_scratch/.NET_PART/Projects/Itransition_course/C\#/Task_6_Blazor_Server/Pages/SendMessageComponent.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcU2VuZE1lc3NhZ2VDb21wb25lbnQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/Programming_scratch/.NET_PART/Projects/Itransition_course/C\#/Task_6_Blazor_Server/_Imports.razor]

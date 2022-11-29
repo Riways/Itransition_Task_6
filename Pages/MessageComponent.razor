@@ -1,11 +1,11 @@
 ﻿<div class="mt-1" >
     @if(@Message.SenderId != @Client.Id){
         <MudExpansionPanel Class="w-75 mr-auto rounded-r-xl" Dense="true" DisableGutters="true" id="recipientMessageHeader"  Text="@( Message.DateOfSending.ToString() + ": "+ Message.MessageTitle)">
-            <MudText Class="pa-4 " Style="background-color:white"  Typo="Typo.body1">@Message.MessageBody</MudText>
+                <MudText Class="pa-4 " Style="background-color:white; word-wrap: break-word;"  Typo="Typo.body1">@Message.MessageBody</MudText>
         </MudExpansionPanel>
     }else{
         <MudExpansionPanel Class="w-75 ml-auto rounded-l-xl" Dense="true" DisableGutters="true" id="clientMessageHeader" Text="@( Message.DateOfSending.ToString() + ": "+ Message.MessageTitle)">
-            <MudText Class="pa-4 " Style="background-color:white"  Typo="Typo.body1">@Message.MessageBody</MudText>
+                <MudText Class="pa-4 " Style="background-color:white; word-wrap: break-word;"    Typo="Typo.body1">@Message.MessageBody</MudText>
         </MudExpansionPanel>
     }
 </div>

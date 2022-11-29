@@ -1,0 +1,29 @@
+﻿ <MudItem  xs="12" md="6">
+        <MudPaper Class="px-10 pb-5 overflow-auto" Elevation="3" Style="height:80vh;" >
+        <MudGrid>
+            <MudItem xs="12" Class="d-flex justify-content-between pb-6 sticky-top"  Style="background-color:white;  ">
+                <MudText   Align="Align.Start"   Typo="Typo.h6" >@Recipient.Name:</MudText>
+                <MudText Align="Align.End" Typo="Typo.h6"  >You:</MudText>
+                </MudItem>
+                <MudItem xs="12" >
+                <MudExpansionPanels >
+                @foreach (var message in MessagesFromCurrentDialog)
+                {
+                    <MessageComponent   Client="@Client" Message="@message"/> 
+                }
+                </MudExpansionPanels>
+            </MudItem>
+        </MudGrid>
+
+    </MudPaper>
+</MudItem>
+@code {
+    [Parameter]
+    public UserModel Client { get; set; }
+    [Parameter]
+    public UserModel Recipient { get; set; }
+    [Parameter]
+    public List<MessageModel>? MessagesFromCurrentDialog { get; set; }
+
+
+}

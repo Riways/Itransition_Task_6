@@ -2,6 +2,8 @@ using Task_6_Blazor_Server.Data;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 using Task_6_Blazor_Server.Services;
+using Microsoft.AspNetCore.ResponseCompression;
+using Task_6_Blazor_Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,12 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IMessageService,MessageService>();
 builder.Services.AddMudServices();
+builder.Services.AddSignalR();
+builder.Services.AddResponseCompression(options =>
+{
+    options.MimeTypes = ResponseCompressionDefaults
+    .MimeTypes.Concat(new[] { "application/octet-stream" });
+});
 
 var app = builder.Build();
 
@@ -33,6 +41,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapBlazorHub();
+app.MapHub<MessageHub>("/messagehub");
 app.MapFallbackToPage("/_Host");
 
 app.Run();

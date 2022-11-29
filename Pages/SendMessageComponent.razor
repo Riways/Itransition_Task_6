@@ -1,0 +1,118 @@
+﻿@using Gma.DataStructures.StringSearch;
+
+<MudItem  xs="12"  md="6">
+    <MudPaper Class="pa-10 overflow-auto" Elevation="3" >
+        <MudForm >
+            <MudGrid Justify="Justify.FlexEnd">
+                <MudItem xs="12">
+                 <MudAutocomplete T="string" SearchFunc="@UserSearch" ValueChanged="@((e) => {RecipientChosen(e);})"  Variant="Variant.Outlined" ResetValueOnEmptyText="true"  AdornmentIcon="@Icons.Material.Filled.Search"   Label="Recipient name" Immediate="true" Required="true" RequiredError="User name is required!"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField T="string" ValueChanged="@((e) => {HandleTitleInput(e);})"  Variant="Variant.Outlined" InputType="InputType.Text" Immediate="true"  Required="true" Label="Title" RequiredError="Title is required!"/>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField T="string" ValueChanged="@((e) => {HandleMessageInput(e);})"  Variant="Variant.Outlined" Lines="5" Label="Message"  Required="true" RequiredError="Message should have a body!"/>
+                </MudItem>
+                <MudButton Class="d-block my-1 mx-3" Variant="Variant.Filled" Disabled="@(!_isValidTitle || !_isValidRecipientName || !_isValidMessage)" OnClick="@SendMessage"  Color="Color.Primary">SEND</MudButton>
+                <MudItem xs="12">
+                    <div class="text-center">
+                        <MudButton Variant="Variant.Filled" Color="Color.Tertiary" OnClick="@ChangeView">view contacts</MudButton>
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </MudPaper>
+</MudItem>
+@code {
+    [Inject]
+    public IUserService? UserService { get; set; }
+    [Inject]
+    private IMessageService? _messageService { get; set; }
+    [Parameter]
+    public UserModel? Client { get; set; }
+    [Parameter]
+    public UserModel? Recipient { get; set; }
+    [Parameter]
+    public List<MessageModel>? MessagesFromCurrentDialog { get; set; }
+    [Parameter]
+    public EventCallback<List<MessageModel>> SetMessagesFromCurrentDialog { get; set; }
+    [Parameter]
+    public EventCallback<UserModel> ContactSetter { get; set; }
+    [Parameter]
+    public EventCallback<bool> SwitchViewBetweenContactsAndSendMessage { get; set; }
+    [Parameter]
+    public HubConnection? HubConnection { get; set; }
+
+    private string? _currentTitle { get; set; }
+    private string? _currentMessage { get; set; }
+
+    private bool _isValidRecipientName { get; set; } = false;
+    private bool _isValidTitle { get; set; } = false;
+    private bool _isValidMessage { get; set; } = false;
+
+    private UkkonenTrie<string>? _usernames;
+
+    protected override async Task? OnInitializedAsync()
+    {
+        _usernames = UserService.GetAllUsernames();
+    }
+
+    private void ChangeView()
+    {
+        SwitchViewBetweenContactsAndSendMessage.InvokeAsync();
+    }
+
+    private async Task<IEnumerable<string>> UserSearch(string input)
+    {
+        await Task.Delay(5);
+        if (String.IsNullOrEmpty(input))
+            return new string[0];
+        var result = _usernames.Retrieve(input);
+        return result;
+    }
+
+    private void HandleMessageInput(string messageBody)
+    {
+        _currentMessage = messageBody;
+        _isValidMessage = messageBody.Length > 0 ? true : false;
+    }
+
+    private void HandleTitleInput(string title)
+    {
+        _currentTitle = title;
+        _isValidTitle = title.Length > 0 ? true : false;
+    }
+
+    private async void RecipientChosen(string recipientName)
+    {
+        if (recipientName == null)
+        {
+            _isValidRecipientName = false;
+            Recipient = null;
+            return;
+        }
+        _isValidRecipientName = true;
+        Recipient = UserService.GetUserByUsername(recipientName);
+        await ContactSetter.InvokeAsync(Recipient);
+        MessagesFromCurrentDialog = _messageService.GetMessagesFromDialog(Client.Id, Recipient.Id);
+        SetMessagesFromCurrentDialog.InvokeAsync(MessagesFromCurrentDialog);
+    }
+
+    private async void SendMessage()
+    {
+        DateTime dateBeforeSending = DateTime.UtcNow;
+        MessageModel newMessage = new MessageModel(Client.Id, _currentTitle, _currentMessage, dateBeforeSending.AddMilliseconds(200));
+        if (HubConnection != null)
+        {
+            await HubConnection.SendAsync("AddMessage", Recipient, newMessage);
+        }
+        lock (this)
+        {
+            _messageService.SendMessage(Client.Id, Recipient.Id, newMessage);
+            List<MessageModel> newMessages = _messageService.GetMessagesFromDialogAfterSpecifiedDate(Client.Id, Recipient.Id, dateBeforeSending);
+            newMessages.AddRange(MessagesFromCurrentDialog);
+            MessagesFromCurrentDialog = newMessages;
+            SetMessagesFromCurrentDialog.InvokeAsync(MessagesFromCurrentDialog);
+        }
+    }
+}

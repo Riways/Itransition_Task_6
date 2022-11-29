@@ -1,32 +1,96 @@
 ﻿@page "/"
 
-@inject IUserService UserService
-
-<PageTitle>Index</PageTitle>
-<MudAppBar Color="Color.Surface"  Fixed="true" Elevation="5" >
-    <MudText  Typo="Typo.h5">Task_6</MudText>
-    <MudSpacer/>
-    <MudButton Class="" Variant="Variant.Filled" Color="Color.Tertiary">Contacts</MudButton>
-    @if (@Client != null)
-    {
-        <MudText Class="mx-2"  Typo="Typo.h5">Hello, @Client.Name</MudText>
-    }
-    <MudIconButton  Icon="@Icons.Custom.Brands.GitHub" Size="Size.Large" Color="Color.Inherit" />
-</MudAppBar>
+<PageTitle>Task_6</PageTitle>
+<Header Client="Client"/>
 @if (Client == null)
 {
     <GreetingComponent  ClientSetter="@SetClient"/>
 }
 else
 {
-    <WriteMessageComponent Client="Client" UserService="UserService"/>
+    <MudGrid Class="align-content-center mt-16 " Justify="Justify.Center" id="greetingForm"  >
+        @if (isContactsView)
+        {
+            <Contacts Client="Client" SetContact="SetContact" SetMessagesFromCurrentDialog="@SetMessagesFromCurrentDialog" SwitchViewBetweenContactsAndSendMessage="@SwitchViewBetweenContactsAndSendMessage" CurrentContact="Contact"/>
+        }
+        else
+        {
+            <SendMessageComponent HubConnection="_hubConnection" ContactSetter="@SetContact" SetMessagesFromCurrentDialog="@SetMessagesFromCurrentDialog" SwitchViewBetweenContactsAndSendMessage="@SwitchViewBetweenContactsAndSendMessage" Client="Client" MessagesFromCurrentDialog="MessagesFromCurrentDialog" Recipient="Contact" />
+        }
+        @if (Contact != null)
+        {
+            <DialogView  Client="Client"   Recipient="Contact" MessagesFromCurrentDialog="MessagesFromCurrentDialog"  />
+        }
+        <MudGrid Class="align-content-end" Justify="Justify.FlexEnd">
+            <MudItem   xs="4">
+                <MudPopover  Open="@_popUpIsOpen"  Fixed="true" Class="px-4 pt-4">
+                    <MudText>Message from: @PopSender.Name</MudText>
+                    <div class="d-flex flex-column">
+                        <MudText Style="word-wrap: break-word;">@PopMessage.MessageBody</MudText>
+                        <MudButton OnClick="@(() => {_popUpIsOpen = false;})" Class="ml-auto mr-n3 mb-1" Color="Color.Error">Close</MudButton>
+                    </div>
+                </MudPopover>
+            </MudItem>
+        </MudGrid>
+    </MudGrid>
 }
 @code{
+    [Inject]
+    public IUserService UserService { get; set; }
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
     public UserModel? Client { get; set; }
+    public UserModel? Contact { get; set; }
+    public List<MessageModel> MessagesFromCurrentDialog { get; set; }
+    public bool isContactsView { get; set; } = false;
+    private HubConnection? _hubConnection;
 
-    public void SetClient(UserModel client)
+    public UserModel PopSender { get; set; }
+    public MessageModel PopMessage { get; set; }
+    public bool _popUpIsOpen { get; set; } = false;
+
+    public async void SetClient(UserModel client)
     {
+        Connect();
         Client = client;
+    }
+
+    public void SetContact(UserModel contact)
+    {
+        Contact = contact;
+    }
+
+    public void SetMessagesFromCurrentDialog(List<MessageModel> messages)
+    {
+        MessagesFromCurrentDialog = messages;
+    }
+
+    public void SwitchViewBetweenContactsAndSendMessage()
+    {
+        isContactsView = !isContactsView;
+    }
+
+    private async Task Connect()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/messagehub")).Build();
+
+        _hubConnection.On<UserModel, MessageModel>("RecieveMessage", (recipient, message) =>
+        {
+            if (recipient.Id == Client.Id )
+            {
+                if(message.SenderId == Contact.Id)
+                    MessagesFromCurrentDialog.Insert(0, message);
+                else
+                {
+                    _popUpIsOpen = true;
+                    PopMessage = message;
+                    PopSender = UserService.GetUserById(recipient.Id);
+                }
+                StateHasChanged();
+            }
+        });
+        await _hubConnection.StartAsync();
     }
 
 }

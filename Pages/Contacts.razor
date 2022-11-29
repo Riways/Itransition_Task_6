@@ -1,6 +1,62 @@
-﻿@page "/user-contacts"
-
+﻿<MudItem  xs="12"  md="6">
+    <MudPaper Class="pa-10 overflow-auto" Elevation="3" >
+        <MudGrid Justify="Justify.FlexStart">
+            <MudItem xs="12" >
+                <MudText Typo="Typo.h5">Contacts: </MudText>
+                @foreach (var contact in _currentContacts)
+                {
+                    <MudItem xs="12">
+                        @if(CurrentContact != null && CurrentContact.Id == contact.Id){
+                            <MudButton Style="text-transform:none" class="mt-1" Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() =>{ChooseContact(contact);})">@contact.Name</MudButton>
+                        }
+                        else
+                        {
+                            <MudButton Style="text-transform:none" class="mt-1 m-auto" Variant="Variant.Filled" OnClick="@(() =>{ChooseContact(contact);})">@contact.Name</MudButton>
+                        }
+                    </MudItem>
+                }
+                <div class="text-center">
+                    <MudButton class="mt-1" Variant="Variant.Filled" Color="Color.Tertiary" OnClick="@ChangeView">send message</MudButton>
+                </div>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudItem>
 
 @code {
+    [Inject]
+    public IMessageService MessageService { get; set; }
+    [Inject]
+    public IUserService UserService { get; set; }
+    [Parameter]
+    public UserModel Client { get; set; }
+    [Parameter]
+    public UserModel CurrentContact { get; set; }
+    [Parameter]
+    public EventCallback<UserModel> SetContact{ get; set; }
+    [Parameter]
+    public EventCallback<bool> SwitchViewBetweenContactsAndSendMessage { get; set; }
+    [Parameter]
+    public EventCallback<List<MessageModel>> SetMessagesFromCurrentDialog { get; set; }
 
+    private List<UserModel> _currentContacts { get; set; }
+    private List<MessageModel> _currentMessages { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _currentContacts = MessageService.GetListOfContacts(Client.Id);
+    }
+
+    public void ChooseContact(UserModel contact)
+    {
+        CurrentContact = contact;
+        SetContact.InvokeAsync(CurrentContact);
+        List<MessageModel> messages = MessageService.GetMessagesFromDialog(Client.Id, CurrentContact.Id);
+        SetMessagesFromCurrentDialog.InvokeAsync(messages);
+    }
+
+    private void ChangeView()
+    {
+        SwitchViewBetweenContactsAndSendMessage.InvokeAsync();
+    }
 }

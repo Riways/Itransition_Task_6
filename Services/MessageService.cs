@@ -1,11 +1,12 @@
-﻿using Task_6_Blazor_Server.Data;
+﻿using System.Collections.Generic;
+using Task_6_Blazor_Server.Data;
 using Task_6_Blazor_Server.Models;
 
 namespace Task_6_Blazor_Server.Services
 {
     public interface IMessageService
     {
-        public List<DialogModel> GetListOfDialogs(int clientId);
+        public List<UserModel> GetListOfContacts(int clientId);
         public List<MessageModel> GetMessagesFromDialog(int clientId, int recipientId);
         public List<MessageModel> GetMessagesFromDialogAfterSpecifiedDate(int clientId, int recipientId, DateTime date);
         public void SendMessage(int clientId, int recipientId, MessageModel message);
@@ -13,17 +14,22 @@ namespace Task_6_Blazor_Server.Services
 
     public class MessageService : IMessageService
     {
-        ApplicationDbContext _dbContext;
+        private readonly ApplicationDbContext _dbContext;
 
         public MessageService(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public List<DialogModel> GetListOfDialogs(int clientId)
+        public List<UserModel> GetListOfContacts(int clientId)
         {
             List<DialogModel> dialogs = _dbContext.Dialogs.Where( d => d.FirstUserId == clientId || d.SecondUserId == clientId).ToList();
-            return dialogs;
+            List<int> contactIds = new();
+            foreach(var dialog in dialogs)
+            {
+                contactIds.Add(dialog.FirstUserId == clientId? dialog.SecondUserId :dialog.FirstUserId);
+            }
+            return _dbContext.Users.Where(u => contactIds.Contains(u.Id)).ToList();
         }
 
         public List<MessageModel> GetMessagesFromDialog(int clientId, int recipientId)
@@ -59,11 +65,6 @@ namespace Task_6_Blazor_Server.Services
         {
             DialogModel? dialog = _dbContext.Dialogs.Where(d => ((d.FirstUserId == clientId && d.SecondUserId == recipientId) || (d.FirstUserId == recipientId && d.SecondUserId == clientId))).FirstOrDefault();
             return dialog;
-        }
-
-        private List<DialogModel> GetAllDialogs()
-        {
-            return _dbContext.Dialogs.ToList();
         }
 
         private DialogModel CreateDialog(int clientId, int recipientId, MessageModel message)

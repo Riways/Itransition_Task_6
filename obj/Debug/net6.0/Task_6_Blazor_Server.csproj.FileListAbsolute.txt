@@ -49,3 +49,11 @@ D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Se
 D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\MudBlazor.dll
 D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\System.IO.Pipelines.dll
 D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\TrieNet.dll
+D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\Microsoft.AspNetCore.Connections.Abstractions.dll
+D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\Microsoft.AspNetCore.Http.Connections.Client.dll
+D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\Microsoft.AspNetCore.Http.Connections.Common.dll
+D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Client.dll
+D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Client.Core.dll
+D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Common.dll
+D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\Microsoft.AspNetCore.SignalR.Protocols.Json.dll
+D:\Programming_scratch\.NET_PART\Projects\Itransition_course\C#\Task_6_Blazor_Server\bin\Debug\net6.0\Microsoft.Extensions.Features.dll

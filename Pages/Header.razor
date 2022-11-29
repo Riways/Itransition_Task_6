@@ -1,0 +1,18 @@
+﻿@inject Microsoft.AspNetCore.Components.NavigationManager navigationManager
+
+<MudAppBar Color="Color.Surface"  Fixed="true" Elevation="5" >
+    <MudText  Typo="Typo.h5">Task_6</MudText>
+    <MudSpacer/>
+
+    @if (@Client != null)
+    {
+            <MudText Class="mx-2"  Typo="Typo.h5">Hello, @Client.Name</MudText>
+
+    }
+    <MudIconButton  Icon="@Icons.Custom.Brands.GitHub" Href="https://github.com/Riways/Task_6" Size="Size.Large" Color="Color.Inherit" />
+</MudAppBar>
+
+@code {
+    [Parameter]
+    public UserModel Client { get; set; }
+}

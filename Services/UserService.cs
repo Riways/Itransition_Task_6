@@ -8,6 +8,7 @@ namespace Task_6_Blazor_Server.Services
     public interface IUserService
     {
         public UserModel? GetUserByUsername(string username);
+        public UserModel? GetUserById(int id);
         public UserModel CreateUser(string username);
         public List<UserModel> GetAllUsers();
         public UkkonenTrie<string> GetAllUsernames();
@@ -26,6 +27,12 @@ namespace Task_6_Blazor_Server.Services
         public UserModel? GetUserByUsername(string username)
         {
             UserModel? user = _dbContext.Users.Where(u => u.Name.Equals(username)).FirstOrDefault();
+            return user;
+        } 
+        
+        public UserModel? GetUserById(int id)
+        {
+            UserModel? user = _dbContext.Users.Where(u => u.Id.Equals(id)).FirstOrDefault();
             return user;
         }
 
