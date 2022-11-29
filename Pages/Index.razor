@@ -1,10 +1,11 @@
 ﻿@page "/"
+@implements IAsyncDisposable
 
 <PageTitle>Task_6</PageTitle>
 <Header Client="Client"/>
 @if (Client == null)
 {
-    <GreetingComponent  ClientSetter="@SetClient"/>
+    <GreetingComponent HubConnection="_hubConnection"  ClientSetter="@SetClient"/>
 }
 else
 {
@@ -52,18 +53,14 @@ else
 
     protected override async Task? OnInitializedAsync()
     {
-        Usernames = UserService.GetAllUsernames();
+        Connect();
+
     }
 
     public async void SetClient(UserModel client)
     {
-        Connect();
         Client = client;
-        if (!Usernames.Retrieve(Client.Name).Contains(Client.Name))
-        {
-            await _hubConnection.SendAsync("NewUser", client);
-            Usernames.Add(Client.Name, Client.Name);
-        }
+        Usernames = UserService.GetAllUsernames();
     }
 
     public void SetContact(UserModel contact)
@@ -101,12 +98,20 @@ else
                 StateHasChanged();
             }
         });
-        _hubConnection.On<UserModel>("AddUser", (user) =>
+        _hubConnection.On<string>("AddUser", (username) =>
         {
-            Usernames.Add(user.Name, user.Name);
+            Usernames.Add(username, username);
             StateHasChanged();
         });
         await _hubConnection.StartAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection != null)
+        {
+            await _hubConnection.DisposeAsync();
+        }
     }
 
 }

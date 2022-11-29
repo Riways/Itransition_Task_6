@@ -11,9 +11,9 @@ namespace Task_6_Blazor_Server.Hubs
             await Clients.All.SendAsync("RecieveMessage", reciever, message);
         }
         
-        public async Task NewUser(UserModel user)
+        public async Task NewUser(string username)
         {
-            await Clients.All.SendAsync("AddUser", user);
+            await Clients.All.SendAsync("AddUser", username);
         }
     }
 }

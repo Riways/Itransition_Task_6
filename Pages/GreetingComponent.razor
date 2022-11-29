@@ -33,6 +33,8 @@
     public IUserService UserService { get; set; }
     [Parameter]
     public EventCallback<UserModel> ClientSetter { get; set; }
+    [Parameter]
+    public HubConnection? HubConnection { get; set; }
     private string _currentUsernameInput { get; set; } = "";
     private bool _isValidInput { get; set; } = false;
     private bool _isLoginInProcess { get; set; } = false;
@@ -43,12 +45,15 @@
         _isValidInput = _currentUsernameInput.Length > 0;
     }
 
-    private void LogInHandler()
+    private async void LogInHandler()
     {
         _isLoginInProcess = true;
         UserModel user = UserService.GetUserByUsername(_currentUsernameInput);
         if (user == null)
+        {
             user = UserService.CreateUser(_currentUsernameInput);
+            await HubConnection.SendAsync("NewUser", _currentUsernameInput);
+        }
         ClientSetter.InvokeAsync(user);
     }
 }
